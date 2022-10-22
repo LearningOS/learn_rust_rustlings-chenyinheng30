@@ -21,15 +21,11 @@ fn main() {
     thread::spawn(move || {
         for _ in 0..10 {
             thread::sleep(Duration::from_millis(250));
-            let mut jc = status_shared.jobs_completed.lock().unwrap();
-            *jc += 1;
-            drop(jc);
+            let mut jobs_completed = status_shared.jobs_completed.lock().unwrap();
+            *jobs_completed += 1;
         }
     });
-    loop {
-        let jc = status.jobs_completed.lock().unwrap();
-        if *jc >= 10 {break;}
-        drop(jc);
+    while *status.jobs_completed.lock().unwrap() < 10 {
         println!("waiting... ");
         thread::sleep(Duration::from_millis(500));
     }
