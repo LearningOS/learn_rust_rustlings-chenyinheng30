@@ -40,25 +40,19 @@ enum ParsePersonError {
 impl FromStr for Person {
     type Err = ParsePersonError;
     fn from_str(s: &str) -> Result<Person, Self::Err> {
-        let mut s = s.split(',');
-        let name_age = (s.next(),s.next());
+        let s = s.split(',').collect::<Vec<&str>>();
         // Match like this "name,age".
-        // Too long and ignore other.
-        if let Some(_) = s.next(){
-            return Err(ParsePersonError::BadLen);
-        }
-        match name_age {
-            (Some(name),Some(age @_))  if name != ""=> {
-                match age.parse::<usize>() {
-                    Ok(age) => Ok(Person{name: name.to_string(), age}),
-                    Err(e) => Err(ParsePersonError::ParseInt(e))
-                }
-            }
-            (Some(_),Some(_)) => Err(ParsePersonError::NoName),
-            (Some(""),None) => Err(ParsePersonError::Empty),
-            (Some(_),None) => Err(ParsePersonError::BadLen),
-            (None,_) => Err(ParsePersonError::Empty)
-        }
+        let (name, age) = match &s[..] {
+            [""] => return Err(ParsePersonError::Empty),
+            [name, age] if *name != "" => (name.to_string(), age),
+            [_, _] => return Err(ParsePersonError::NoName),
+            _ => return Err(ParsePersonError::BadLen)
+        };
+        let age = match age.parse::<usize>() {
+            Ok(age) => age,
+            Err(e) => return Err(ParsePersonError::ParseInt(e))
+        };
+        Ok(Person{name, age})
     }
 }
 

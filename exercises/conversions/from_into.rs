@@ -36,21 +36,17 @@ impl Default for Person {
 
 impl From<&str> for Person {
     fn from(s: &str) -> Person {
-        let mut s = s.split(',');
-        let name_age = (s.next(),s.next());
+        let s = s.split(',').collect::<Vec<&str>>();
         // Match like this "name,age".
-        // Ignore other.
-        if let Some(_) = s.next(){
-            return Person::default();
-        }
-        match name_age {
-            (Some(name),Some(age))  if name != ""=> {
+        match &s[..] {
+            [name, age] if *name != "" => {
+                let name = name.to_string();
                 match age.parse::<usize>() {
-                    Ok(age) => Person{name: name.to_string(), age},
-                    Err(_) => Person::default()
+                    Ok(age) => Person{name, age},
+                    _ => return Person::default()
                 }
-            }
-            _ => Person::default()
+            },
+            _ => return Person::default()
         }
     }
 }

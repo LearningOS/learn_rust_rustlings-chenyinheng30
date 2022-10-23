@@ -95,15 +95,10 @@ impl FromStr for Climate {
     // cases.
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         let v: Vec<_> = s.split(',').collect();
-        if v[0] == "" {
-            match v.len() {
-                1 => return Err(ParseClimateError::Empty),
-                3 => return Err(ParseClimateError::NoCity),
-                _ => return Err(ParseClimateError::BadLen)
-            }
-        }
         let (city, year, temp) = match &v[..] {
-            [city, year, temp] => (city.to_string(), year, temp),
+            [""] => return  Err(ParseClimateError::Empty),
+            [city, year, temp] if *city != "" => (city.to_string(), year, temp),
+            [_, _, _] => return  Err(ParseClimateError::NoCity),
             _ => return Err(ParseClimateError::BadLen),
         };
         let year: u32 = year.parse()?;
